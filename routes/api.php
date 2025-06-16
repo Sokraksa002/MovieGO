@@ -13,7 +13,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('media', Api\MediaController::class)->only(['index', 'show']);
     Route::apiResource('episodes', Api\EpisodeController::class)->only(['show']);
-    Route::get('/genres', [Api\GenreController::class, 'index']);
+    Route::get('/genres', [Api\GenresController::class, 'index']);
 
     Route::post('/ratings', [Api\RatingController::class, 'store']);
     Route::get('/favorites', [Api\FavoriteController::class, 'index']);
