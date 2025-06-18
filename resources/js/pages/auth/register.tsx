@@ -1,119 +1,102 @@
-import { Head, useForm } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
-
-import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import AuthLayout from '@/layouts/auth-layout';
-
-type RegisterForm = {
-    name: string;
-    email: string;
-    password: string;
-    password_confirmation: string;
-};
+import React from 'react';
+import { useForm } from '@inertiajs/react';
 
 export default function Register() {
-    const { data, setData, post, processing, errors, reset } = useForm<Required<RegisterForm>>({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
+  const { data, setData, post, errors } = useForm({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+  });
 
-    const submit: FormEventHandler = (e) => {
-        e.preventDefault();
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
-    };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setData(e.target.name as keyof typeof data, e.target.value);
+  };
 
-    return (
-        <AuthLayout title="Create an account" description="Enter your details below to create your account">
-            <Head title="Register" />
-            <form className="flex flex-col gap-6" onSubmit={submit}>
-                <div className="grid gap-6">
-                    <div className="grid gap-2">
-                        <Label htmlFor="name">Name</Label>
-                        <Input
-                            id="name"
-                            type="text"
-                            required
-                            autoFocus
-                            tabIndex={1}
-                            autoComplete="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
-                            disabled={processing}
-                            placeholder="Full name"
-                        />
-                        <InputError message={errors.name} className="mt-2" />
-                    </div>
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    post('/register');
+  };
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            required
-                            tabIndex={2}
-                            autoComplete="email"
-                            value={data.email}
-                            onChange={(e) => setData('email', e.target.value)}
-                            disabled={processing}
-                            placeholder="email@example.com"
-                        />
-                        <InputError message={errors.email} />
-                    </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Create a new account
+          </h2>
+        </div>
+        
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={data.name}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+            </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={3}
-                            autoComplete="new-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            disabled={processing}
-                            placeholder="Password"
-                        />
-                        <InputError message={errors.password} />
-                    </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={data.email}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+            </div>
 
-                    <div className="grid gap-2">
-                        <Label htmlFor="password_confirmation">Confirm password</Label>
-                        <Input
-                            id="password_confirmation"
-                            type="password"
-                            required
-                            tabIndex={4}
-                            autoComplete="new-password"
-                            value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
-                            disabled={processing}
-                            placeholder="Confirm password"
-                        />
-                        <InputError message={errors.password_confirmation} />
-                    </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={data.password}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+            </div>
 
-                    <Button type="submit" className="mt-2 w-full" tabIndex={5} disabled={processing}>
-                        {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                        Create account
-                    </Button>
-                </div>
+            <div>
+              <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
+                Confirm Password
+              </label>
+              <input
+                id="password_confirmation"
+                name="password_confirmation"
+                type="password"
+                value={data.password_confirmation}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+          </div>
 
-                <div className="text-muted-foreground text-center text-sm">
-                    Already have an account?{' '}
-                    <TextLink href={route('login')} tabIndex={6}>
-                        Log in
-                    </TextLink>
-                </div>
-            </form>
-        </AuthLayout>
-    );
+          <button
+            type="submit"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            Register
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }

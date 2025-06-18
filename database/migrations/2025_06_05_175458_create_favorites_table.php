@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('favorites', function (Blueprint $table) {
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('media_id')->constrained()->onDelete('cascade')->onDelete('set null');
+            $table->foreignId('media_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('episode_id')->nullable()->constrained()->onDelete('set null');
-            $table->timestamp('created_at')->nullable();
-            $table->primary(['user_id', 'media_id']);
+            $table->timestamps();
+
+            // Composite unique to prevent duplicate favorites for the same user/content
+            $table->unique(['user_id', 'media_id', 'episode_id']);
         });
     }
 

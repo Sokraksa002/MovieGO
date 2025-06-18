@@ -18,6 +18,9 @@ class WatchHistoryController extends Controller
         $validated = $request->validate([
             'media_id' => 'nullable|required_without:episode_id|exists:media,id',
             'episode_id' => 'nullable|required_without:media_id|exists:episodes,id',
+            'progress' => 'required|integer|min:0',
+            'duration' => 'required|integer|min:1',
+            'watched_at' => 'nullable|date',
         ]);
 
         $validated['user_id'] = $request->user()->id;

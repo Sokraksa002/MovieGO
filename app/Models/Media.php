@@ -2,12 +2,24 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Media extends Model
 {
+
+    use HasFactory;
+
     protected $fillable = [
-        'title', 'description', 'external_link', 'type', 'poster_url'
+        'title',
+        'description',
+        'year',
+        'duration',
+        'type',
+        'poster_url',
+        'backdrop_url',
+        'trailer_url',
+        'rating',
     ];
 
     public function genres()

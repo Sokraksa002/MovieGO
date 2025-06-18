@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 
@@ -10,10 +9,12 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        User::factory()->count(10)->create();
         User::factory()->admin()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@example.com',
-        ]);
+        'name' => 'Admin User',
+        'email' => 'admin@example.com',
+    ]);
+
+    // Then create 10 users (factory will generate unique emails)
+    User::factory()->count(10)->create();
     }
 }

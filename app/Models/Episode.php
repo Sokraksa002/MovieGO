@@ -2,12 +2,20 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Episode extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
-        'media_id', 'title', 'external_link', 'episode_number'
+        'media_id',
+        'season',
+        'episode',
+        'title',
+        'duration',
+        'video_url',
     ];
 
     public function media()

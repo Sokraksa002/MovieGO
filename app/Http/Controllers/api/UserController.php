@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    // Return the authenticated user's account info with favorites and watch history
     public function account(Request $request)
     {
         return $request->user()->load([
