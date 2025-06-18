@@ -11,7 +11,6 @@ export default defineConfig({
             refresh: true,
         }),
         react(),
-        // Remove tailwindcss() here; Tailwind is configured via tailwind.config.js and postcss.config.js
     ],
     esbuild: {
         jsx: 'automatic',
