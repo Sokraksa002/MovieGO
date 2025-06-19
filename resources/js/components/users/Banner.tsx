@@ -139,7 +139,7 @@ const Banner: React.FC<BannerProps> = ({ featuredMovies = [] }) => {
             <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
               <button
                 onClick={handlePlayClick}
-                className="flex items-center justify-center space-x-3 bg-white text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-200 transition-all duration-200 transform hover:scale-105"
+                className="flex items-center justify-center space-x-3 bg-yellow-400 text-black px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-200 transition-all duration-200 transform hover:scale-105"
               >
                 <PlayIcon className="w-6 h-6" />
                 <span>Play Now</span>

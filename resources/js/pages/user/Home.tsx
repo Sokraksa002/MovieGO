@@ -79,7 +79,7 @@ const Home: React.FC = () => {
         {/* Your Watchlist - Only show for authenticated users */}
         <section className="py-8 mb-8">
           <div className="px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">My Watchlist</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-yellow-400 mb-6">My Watchlist</h2>
             <div className="text-gray-400 text-center py-12">
               <div className="text-6xl mb-4">💾</div>
               <p>Add movies and shows to your watchlist to see them here</p>
