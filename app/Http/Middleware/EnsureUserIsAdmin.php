@@ -15,11 +15,11 @@ class EnsureUserIsAdmin
      * @return mixed
      */
     public function handle($request, Closure $next)
-{
-    if (!$request->user() || !$request->user()->is_admin) {
-        return response()->json(['message' => 'Unauthorized'], 403);
-    }
+    {
+        if (!$request->user() || !$request->user()->is_admin) {
+            return redirect()->route('home')->with('error', 'You do not have permission to access the admin area.');
+        }
 
-    return $next($request);
-}
+        return $next($request);
+    }
 }

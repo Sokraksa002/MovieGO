@@ -21,5 +21,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Vite::prefetch(concurrency: 3);
+        
+        // Share auth data with all Inertia views
+        \Inertia\Inertia::share([
+            'auth' => function () {
+                return [
+                    'user' => \Illuminate\Support\Facades\Auth::user(),
+                ];
+            },
+        ]);
     }
 }

@@ -12,20 +12,20 @@ class MediaController extends Controller
 {
     $query = Media::with('genres');
 
-    // Filter by title (case-insensitive, partial match)
+    // Filter by title
     if ($request->filled('title')) {
         $query->where('title', 'like', '%' . $request->input('title') . '%');
     }
 
-    // Filter by genre (expects genre_id or array of genre_ids)
+    // Filter by genre name
     if ($request->filled('genre')) {
-        $genreIds = is_array($request->genre) ? $request->genre : [$request->genre];
-        $query->whereHas('genres', function ($q) use ($genreIds) {
-            $q->whereIn('genres.id', $genreIds);
+        $genreName = $request->input('genre');
+        $query->whereHas('genres', function ($q) use ($genreName) {
+            $q->where('name', 'like', '%' . $genreName . '%');
         });
     }
 
-    // Optional: Add pagination
+    // Return 12 items per page
     return $query->paginate(12);
 }
 }
