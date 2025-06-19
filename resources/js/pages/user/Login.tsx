@@ -30,7 +30,7 @@ export default function Login() {
                         </h2>
                         <p className="mt-2 text-sm text-gray-400">
                             Or{' '}
-                            <Link href="/user/register" className="font-medium text-yellow-500 hover:text-yellow-400">
+                            <Link href="/register" className="font-medium text-yellow-500 hover:text-yellow-400">
                                 create a new account
                             </Link>
                         </p>
