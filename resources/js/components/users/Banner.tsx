@@ -16,9 +16,9 @@ const Banner: React.FC<BannerProps> = ({ featuredMovies = [] }) => {
       id: 1,
       title: "Avatar: The Way of Water",
       description: "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their planet.",
-      poster_path: "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
-      backdrop_path: "https://image.tmdb.org/t/p/original/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg",
-      release_date: "2022-12-16",
+      poster_url: "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg",
+      backdrop_url: "https://image.tmdb.org/t/p/original/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg",
+      year: "2022",
       duration: 192,
       rating: 8.7,
       genres: [{ id: 1, name: "Action" }, { id: 2, name: "Adventure" }, { id: 3, name: "Sci-Fi" }],
@@ -29,9 +29,9 @@ const Banner: React.FC<BannerProps> = ({ featuredMovies = [] }) => {
       id: 2,
       title: "Top Gun: Maverick",
       description: "After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past when he leads TOP GUN's elite graduates on a mission that demands the ultimate sacrifice from those chosen to fly it.",
-      poster_path: "https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",
-      backdrop_path: "https://image.tmdb.org/t/p/original/odJ4hx6g6vBt4lBWKFD1tI8WS4x.jpg",
-      release_date: "2022-05-27",
+      poster_url: "https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg",
+      backdrop_url: "https://image.tmdb.org/t/p/original/odJ4hx6g6vBt4lBWKFD1tI8WS4x.jpg",
+      year: "2022",
       duration: 130,
       rating: 8.9,
       genres: [{ id: 1, name: "Action" }, { id: 4, name: "Drama" }],
@@ -42,9 +42,9 @@ const Banner: React.FC<BannerProps> = ({ featuredMovies = [] }) => {
       id: 3,
       title: "Black Panther: Wakanda Forever",
       description: "The people of Wakanda fight to protect their home from intervening world powers as they mourn the death of King T'Challa.",
-      poster_path: "https://image.tmdb.org/t/p/w500/sv1xJUazXeYqALzczSZ3O6nkH75.jpg",
-      backdrop_path: "https://image.tmdb.org/t/p/original/xDMIl84Qo5Tsu62c9DGWhmPI67A.jpg",
-      release_date: "2022-11-11",
+      poster_url: "https://image.tmdb.org/t/p/w500/sv1xJUazXeYqALzczSZ3O6nkH75.jpg",
+      backdrop_url: "https://image.tmdb.org/t/p/original/xDMIl84Qo5Tsu62c9DGWhmPI67A.jpg",
+      year: "2022",
       duration: 161,
       rating: 8.2,
       genres: [{ id: 1, name: "Action" }, { id: 2, name: "Adventure" }, { id: 5, name: "Superhero" }],
@@ -70,31 +70,30 @@ const Banner: React.FC<BannerProps> = ({ featuredMovies = [] }) => {
     if (currentMovie.streaming_url) {
       window.location.href = currentMovie.streaming_url;
     }
-  };
-
-  const handleWatchTrailer = () => {
-    // If movie has a trailer URL, use it
-    if (currentMovie.trailer_url) {
-      window.open(currentMovie.trailer_url, '_blank');
-    } else {
-      // Fallback: Search for trailer on YouTube
-      const searchQuery = encodeURIComponent(`${currentMovie.title} trailer ${new Date(currentMovie.release_date).getFullYear()}`);
-      const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
-      window.open(youtubeSearchUrl, '_blank');
-    }
-  };
+  };      const handleWatchTrailer = () => {
+        // If movie has a trailer URL, use it
+        if (currentMovie.trailer_url) {
+          window.open(currentMovie.trailer_url, '_blank');
+        } else {
+          // Fallback: Search for trailer on YouTube
+          const year = currentMovie.year || '';
+          const searchQuery = encodeURIComponent(`${currentMovie.title} trailer ${year}`);
+          const youtubeSearchUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
+          window.open(youtubeSearchUrl, '_blank');
+        }
+      };
 
   return (
-    <div className="relative h-screen overflow-hidden">
+    <div className="relative h-[90vh] overflow-hidden">
       {/* Background Image with Gradient Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-1000 ease-in-out transform scale-105"
         style={{
-          backgroundImage: `url(${currentMovie.backdrop_path})`,
+          backgroundImage: `url(${currentMovie.backdrop_url || currentMovie.backdrop_path})`,
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
       </div>
 
       {/* Content */}
@@ -113,7 +112,7 @@ const Banner: React.FC<BannerProps> = ({ featuredMovies = [] }) => {
                   <StarIcon className="w-5 h-5 text-yellow-400 fill-current" />
                   <span className="font-semibold">{currentMovie.rating}</span>
                 </div>
-                <span>{new Date(currentMovie.release_date).getFullYear()}</span>
+                <span>{currentMovie.year || ''}</span>
                 {currentMovie.duration && (
                   <span>{Math.floor(currentMovie.duration / 60)}h {currentMovie.duration % 60}m</span>
                 )}

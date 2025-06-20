@@ -10,39 +10,34 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class AdminMediaController extends Controller
+class AdminTVShowController extends Controller
 {
-    // Get all media (movies + TV shows) with pagination
+    // Get all TV shows with pagination
     public function index(Request $request)
     {
         try {
-            $query = Media::with('genres');
-
-            // Filter by type if specified
-            if ($request->has('type')) {
-                $query->where('type', $request->type);
-            }
+            $query = Media::with('genres')->where('type', 'tv_show');
 
             // Search functionality
             if ($request->has('search') && $request->search) {
                 $query->where('title', 'like', '%' . $request->search . '%');
             }
 
-            $media = $query->orderBy('created_at', 'desc')->paginate(15);
+            $tvshows = $query->orderBy('created_at', 'desc')->paginate(15);
 
             return response()->json([
                 'success' => true,
-                'data' => $media
+                'data' => $tvshows
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch media: ' . $e->getMessage()
+                'message' => 'Failed to fetch TV shows: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    // Create new media
+    // Create new TV show
     public function store(Request $request)
     {
         try {
@@ -50,15 +45,13 @@ class AdminMediaController extends Controller
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'year' => 'nullable|string|max:4',
-                'duration' => 'nullable|integer|min:1',
-                'type' => 'required|in:movie,tv_show',
+                'first_air_date' => 'nullable|date',
+                'last_air_date' => 'nullable|date',
+                'status' => 'nullable|in:returning,ended,canceled,in_production',
                 'poster_url' => 'nullable|string',
                 'backdrop_url' => 'nullable|string', 
                 'trailer_url' => 'nullable|url',
                 'rating' => 'nullable|numeric|min:0|max:10',
-                'first_air_date' => 'nullable|date',
-                'last_air_date' => 'nullable|date',
-                'status' => 'nullable|in:returning,ended,canceled,in_production',
                 'seasons_count' => 'nullable|integer|min:1',
                 'episodes_count' => 'nullable|integer|min:1',
                 'genres' => 'nullable|array',
@@ -84,19 +77,22 @@ class AdminMediaController extends Controller
             // Remove file inputs from validated data
             unset($validated['poster_image'], $validated['backdrop_image']);
 
-            $media = Media::create($validated);
+            // Set type to TV show
+            $validated['type'] = 'tv_show';
+
+            $tvshow = Media::create($validated);
 
             // Attach genres if provided
             if (!empty($validated['genres'])) {
-                $media->genres()->sync($validated['genres']);
+                $tvshow->genres()->sync($validated['genres']);
             }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Media created successfully',
-                'data' => $media->load('genres')
+                'message' => 'TV show created successfully',
+                'data' => $tvshow->load('genres')
             ], 201);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -110,44 +106,58 @@ class AdminMediaController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create media: ' . $e->getMessage()
+                'message' => 'Failed to create TV show: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    // Get single media with details
-    public function show(Media $media)
+    // Get single TV show with details
+    public function show(Media $tvshow)
     {
         try {
+            // Ensure it's a TV show
+            if ($tvshow->type !== 'tv_show') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Media is not a TV show'
+                ], 404);
+            }
+
             return response()->json([
                 'success' => true,
-                'data' => $media->load(['genres', 'episodes'])
+                'data' => $tvshow->load(['genres', 'episodes'])
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch media: ' . $e->getMessage()
+                'message' => 'Failed to fetch TV show: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    // Update media
-    public function update(Request $request, Media $media)
+    // Update TV show
+    public function update(Request $request, Media $tvshow)
     {
         try {
+            // Ensure it's a TV show
+            if ($tvshow->type !== 'tv_show') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Media is not a TV show'
+                ], 404);
+            }
+
             $validated = $request->validate([
                 'title' => 'sometimes|required|string|max:255',
                 'description' => 'nullable|string',
                 'year' => 'nullable|string|max:4',
-                'duration' => 'nullable|integer|min:1',
-                'type' => 'sometimes|required|in:movie,tv_show',
+                'first_air_date' => 'nullable|date',
+                'last_air_date' => 'nullable|date',
+                'status' => 'nullable|in:returning,ended,canceled,in_production',
                 'poster_url' => 'nullable|string',
                 'backdrop_url' => 'nullable|string',
                 'trailer_url' => 'nullable|url',
                 'rating' => 'nullable|numeric|min:0|max:10',
-                'first_air_date' => 'nullable|date',
-                'last_air_date' => 'nullable|date',
-                'status' => 'nullable|in:returning,ended,canceled,in_production',
                 'seasons_count' => 'nullable|integer|min:1',
                 'episodes_count' => 'nullable|integer|min:1',
                 'genres' => 'nullable|array',
@@ -161,8 +171,8 @@ class AdminMediaController extends Controller
             // Handle poster image upload
             if ($request->hasFile('poster_image')) {
                 // Delete old poster if exists and is local
-                if ($media->poster_url && Str::startsWith($media->poster_url, '/storage/')) {
-                    $oldPath = str_replace('/storage/', '', $media->poster_url);
+                if ($tvshow->poster_url && Str::startsWith($tvshow->poster_url, '/storage/')) {
+                    $oldPath = str_replace('/storage/', '', $tvshow->poster_url);
                     Storage::disk('public')->delete($oldPath);
                 }
                 
@@ -173,8 +183,8 @@ class AdminMediaController extends Controller
             // Handle backdrop image upload
             if ($request->hasFile('backdrop_image')) {
                 // Delete old backdrop if exists and is local
-                if ($media->backdrop_url && Str::startsWith($media->backdrop_url, '/storage/')) {
-                    $oldPath = str_replace('/storage/', '', $media->backdrop_url);
+                if ($tvshow->backdrop_url && Str::startsWith($tvshow->backdrop_url, '/storage/')) {
+                    $oldPath = str_replace('/storage/', '', $tvshow->backdrop_url);
                     Storage::disk('public')->delete($oldPath);
                 }
                 
@@ -185,19 +195,19 @@ class AdminMediaController extends Controller
             // Remove file inputs from validated data
             unset($validated['poster_image'], $validated['backdrop_image']);
 
-            $media->update($validated);
+            $tvshow->update($validated);
 
             // Update genres if provided
             if (array_key_exists('genres', $validated)) {
-                $media->genres()->sync($validated['genres'] ?? []);
+                $tvshow->genres()->sync($validated['genres'] ?? []);
             }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Media updated successfully',
-                'data' => $media->fresh(['genres'])
+                'message' => 'TV show updated successfully',
+                'data' => $tvshow->fresh(['genres'])
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -211,43 +221,51 @@ class AdminMediaController extends Controller
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update media: ' . $e->getMessage()
+                'message' => 'Failed to update TV show: ' . $e->getMessage()
             ], 500);
         }
     }
 
-    // Delete media
-    public function destroy(Media $media)
+    // Delete TV show
+    public function destroy(Media $tvshow)
     {
         try {
+            // Ensure it's a TV show
+            if ($tvshow->type !== 'tv_show') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Media is not a TV show'
+                ], 404);
+            }
+
             DB::beginTransaction();
 
             // Delete associated images if they are local uploads
-            if ($media->poster_url && Str::startsWith($media->poster_url, '/storage/')) {
-                $posterPath = str_replace('/storage/', '', $media->poster_url);
+            if ($tvshow->poster_url && Str::startsWith($tvshow->poster_url, '/storage/')) {
+                $posterPath = str_replace('/storage/', '', $tvshow->poster_url);
                 Storage::disk('public')->delete($posterPath);
             }
 
-            if ($media->backdrop_url && Str::startsWith($media->backdrop_url, '/storage/')) {
-                $backdropPath = str_replace('/storage/', '', $media->backdrop_url);
+            if ($tvshow->backdrop_url && Str::startsWith($tvshow->backdrop_url, '/storage/')) {
+                $backdropPath = str_replace('/storage/', '', $tvshow->backdrop_url);
                 Storage::disk('public')->delete($backdropPath);
             }
 
-            // Delete media record (this will also delete related records due to foreign key constraints)
-            $media->delete();
+            // Delete TV show record (this will also delete related records due to foreign key constraints)
+            $tvshow->delete();
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Media deleted successfully'
+                'message' => 'TV show deleted successfully'
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to delete media: ' . $e->getMessage()
+                'message' => 'Failed to delete TV show: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -20,6 +20,11 @@ class Media extends Model
         'backdrop_url',
         'trailer_url',
         'rating',
+        'first_air_date',
+        'last_air_date',
+        'status',
+        'seasons_count',
+        'episodes_count',
     ];
 
     public function genres()

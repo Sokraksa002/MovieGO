@@ -24,8 +24,8 @@ const Streaming: React.FC = () => {
 
   const dateString = isTV 
     ? (movie as TVShow).first_air_date 
-    : (movie as Movie).release_date;
-  const year = dateString ? new Date(dateString).getFullYear() : '';
+    : (movie as Movie).year;
+  const year = dateString || '';
   
   const duration = isTV 
     ? 0 
@@ -50,7 +50,7 @@ const Streaming: React.FC = () => {
         <div className="relative">
           <VideoPlayer
             src={movie.streaming_url || ''}
-            poster={movie.backdrop_path}
+            poster={movie.backdrop_url || movie.backdrop_path}
             title={title}
             className="w-full h-[70vh]"
             controls={true}
@@ -75,7 +75,7 @@ const Streaming: React.FC = () => {
               {/* Media Poster */}
               <div className="flex-shrink-0 mb-6 md:mb-0">
                 <img
-                  src={movie.poster_path}
+                  src={movie.poster_url || movie.poster_path}
                   alt={title}
                   className="w-48 h-72 object-cover rounded-lg mx-auto md:mx-0"
                 />

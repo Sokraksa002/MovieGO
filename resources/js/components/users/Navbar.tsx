@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { router } from '@inertiajs/react';
-import { FaHome, FaStar, FaHistory, FaSearch, FaUser, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
+import { FaHome, FaSearch, FaUser, FaSignInAlt, FaUserPlus } from 'react-icons/fa';
 import { SharedData } from '../../types';
 
 const Navbar = () => {
@@ -56,6 +56,7 @@ const Navbar = () => {
         <Link href="/" className="flex items-center gap-2 px-4 py-2 rounded bg-zinc-800 font-medium hover:bg-zinc-700 transition">
           <FaHome /> Home
         </Link>
+        <Link href="/movies" className="hover:text-yellow-400 transition">Movies</Link>
         <Link href="/movies/popular" className="hover:text-yellow-400 transition">Popular Movies</Link>
         <Link href="/movies/latest" className="hover:text-yellow-400 transition">Latest Movies</Link>
         <Link href="/tv-shows" className="hover:text-yellow-400 transition">TV Shows</Link>
@@ -106,28 +107,17 @@ const Navbar = () => {
               className="flex items-center focus:outline-none hover:opacity-80 transition-opacity"
             >
               <img
-                src="/default-avatar.png"
+                src="/default-avatar.svg"
                 alt="User Avatar"
                 className="w-9 h-9 rounded-full border-2 border-orange-400"
+                onError={(e) => {
+                  e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDE1MCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTUwIiBmaWxsPSIjNjM2NmYxIi8+CjxjaXJjbGUgY3g9Ijc1IiBjeT0iNjAiIHI9IjI1IiBmaWxsPSIjZmZmZmZmIi8+CjxlbGxpcHNlIGN4PSI3NSIgY3k9IjEyNSIgcng9IjQ1IiByeT0iMzAiIGZpbGw9IiNmZmZmZmYiLz4KPC9zdmc+';
+                }}
               />
             </button>
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white text-zinc-900 rounded-lg shadow-xl z-50 border border-gray-200">
                 <div className="py-2">
-                  <Link 
-                    href="/favorites" 
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-zinc-100 transition-colors"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <FaStar className="text-orange-400" /> Favorites
-                  </Link>
-                  <Link 
-                    href="/history" 
-                    className="flex items-center gap-2 px-4 py-2 hover:bg-zinc-100 transition-colors"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <FaHistory className="text-zinc-700" /> History Watch
-                  </Link>
                   <Link 
                     href="/profile" 
                     className="flex items-center gap-2 px-4 py-2 hover:bg-zinc-100 transition-colors"

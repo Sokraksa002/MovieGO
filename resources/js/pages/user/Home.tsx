@@ -13,7 +13,7 @@ const Home: React.FC = () => {
     popularMovies = [], 
     latestMovies = [], 
     popularTVShows = [],
-    trendingToday = []
+    allMovies = []
   } = usePage<HomePageProps>().props;
 
   return (
@@ -24,68 +24,55 @@ const Home: React.FC = () => {
       <Banner featuredMovies={featuredMovies} />
       
       {/* Content Sections */}
-      <main className="relative -mt-32 z-10">
-        {/* Trending Today */}
-        {trendingToday.length > 0 && (
-          <MovieSection
-            title="Trending Today"
-            movies={trendingToday}
-            viewAllLink="/trending"
-            className="mb-8"
-          />
-        )}
+      <main className="bg-black py-8">
+        <div className="space-y-12">
+          {/* Popular Movies */}
+          {popularMovies.length > 0 && (
+            <MovieSection
+              title="Popular Movies"
+              movies={popularMovies}
+              viewAllLink="/movies/popular"
+            />
+          )}
 
-        {/* Popular Movies */}
-        {popularMovies.length > 0 && (
-          <MovieSection
-            title="Popular Movies"
-            movies={popularMovies}
-            viewAllLink="/movies/popular"
-            className="mb-8"
-          />
-        )}
+          {/* Latest Movies */}
+          {latestMovies.length > 0 && (
+            <MovieSection
+              title="Latest Movies"
+              movies={latestMovies}
+              viewAllLink="/movies/latest"
+            />
+          )}
 
-        {/* Latest Movies */}
-        {latestMovies.length > 0 && (
-          <MovieSection
-            title="Latest Releases"
-            movies={latestMovies}
-            viewAllLink="/movies/latest"
-            className="mb-8"
-          />
-        )}
+          {/* All Movies */}
+          {allMovies.length > 0 && (
+            <MovieSection
+              title="All Movies"
+              movies={allMovies}
+              viewAllLink="/movies"
+            />
+          )}
 
-        {/* Popular TV Shows */}
-        {popularTVShows.length > 0 && (
-          <TVShowSection
-            title="Popular TV Shows"
-            shows={popularTVShows}
-            seeAllLink="/tv-shows"
-            className="mb-8"
-          />
-        )}
-
-        {/* Continue Watching - Only show for authenticated users */}
-        <section className="py-8 mb-8">
-          <div className="px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Continue Watching</h2>
-            <div className="text-gray-400 text-center py-12">
-              <div className="text-6xl mb-4">📺</div>
-              <p>Start watching something to see it here</p>
+          {/* Popular TV Shows */}
+          {popularTVShows.length > 0 && (
+            <TVShowSection
+              title="Popular TV Shows"
+              shows={popularTVShows}
+              seeAllLink="/tv-shows"
+            />
+          )}
+          
+          {/* No Movies Found Message */}
+          {!featuredMovies.length && !popularMovies.length && !latestMovies.length && 
+           !popularTVShows.length && !allMovies.length && (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold text-gray-400 mb-4">No Movies or TV Shows Found</h2>
+              <p className="text-gray-500">
+                This could be due to an empty database or a connection issue.
+              </p>
             </div>
-          </div>
-        </section>
-
-        {/* Your Watchlist - Only show for authenticated users */}
-        <section className="py-8 mb-8">
-          <div className="px-6 lg:px-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-yellow-400 mb-6">My Watchlist</h2>
-            <div className="text-gray-400 text-center py-12">
-              <div className="text-6xl mb-4">💾</div>
-              <p>Add movies and shows to your watchlist to see them here</p>
-            </div>
-          </div>
-        </section>
+          )}
+        </div>
       </main>
 
       <Footer />

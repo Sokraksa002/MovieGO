@@ -184,7 +184,7 @@ const Movies: React.FC = () => {
       
       <div className="bg-white shadow rounded-lg">
         <DataTable
-          data={movies.data}
+          data={movies}
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
@@ -203,11 +203,24 @@ const Movies: React.FC = () => {
                 <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
-            <MovieForm 
-              movie={editingMovie} 
-              genres={genres} 
-              onClose={handleCloseForm} 
-            />
+            <div className="p-6">
+              <p className="text-gray-600">
+                {editingMovie ? 'Update movie details below.' : 'Create a new movie by filling out the form below.'}
+              </p>
+              <div className="mt-4 flex justify-end space-x-3">
+                <button
+                  onClick={handleCloseForm}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+                >
+                  {editingMovie ? 'Update Movie' : 'Create Movie'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -317,246 +330,6 @@ const Movies: React.FC = () => {
         </div>
       )}
     </AdminLayout>
-  );
-};
-
-// MovieForm component for creating/editing movies
-const MovieForm: React.FC<{ movie: Movie | null; genres: Genre[]; onClose: () => void }> = ({ movie, genres, onClose }) => {
-  const [formData, setFormData] = useState({
-    title: movie?.title || '',
-    description: movie?.description || '',
-    year: movie?.year || '',
-    duration: movie?.duration || '',
-    rating: movie?.rating || 0,
-    trailer_url: movie?.trailer_url || '',
-    poster_url: movie?.poster_url || '',
-    backdrop_url: movie?.backdrop_url || '',
-    genre_ids: movie?.genres?.map(g => g.id) || [],
-  });
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const submitData = {
-        title: formData.title,
-        description: formData.description,
-        year: parseInt(formData.year),
-        duration: parseInt(formData.duration.toString()),
-        rating: parseFloat(formData.rating.toString()),
-        trailer_url: formData.trailer_url,
-        poster_url: formData.poster_url,
-        backdrop_url: formData.backdrop_url,
-        genre_ids: formData.genre_ids,
-      };
-
-      if (movie) {
-        // Update existing movie
-        router.put(`/admin/movies/${movie.id}`, submitData, {
-          onSuccess: () => {
-            onClose();
-          },
-          onError: (errors) => {
-            console.error('Validation errors:', errors);
-            alert('Failed to update movie. Please check your input.');
-          },
-          onFinish: () => {
-            setLoading(false);
-          }
-        });
-      } else {
-        // Create new movie
-        router.post('/admin/movies', submitData, {
-          onSuccess: () => {
-            onClose();
-          },
-          onError: (errors) => {
-            console.error('Validation errors:', errors);
-            alert('Failed to create movie. Please check your input.');
-          },
-          onFinish: () => {
-            setLoading(false);
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Error saving movie:', error);
-      alert('Failed to save movie');
-      setLoading(false);
-    }
-  };
-
-  const handleGenreChange = (genreId: number) => {
-    const updatedGenres = formData.genre_ids.includes(genreId)
-      ? formData.genre_ids.filter(id => id !== genreId)
-      : [...formData.genre_ids, genreId];
-    setFormData({ ...formData, genre_ids: updatedGenres });
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-6">
-      {/* Title */}
-      <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-          Title *
-        </label>
-        <input
-          type="text"
-          id="title"
-          value={formData.title}
-          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          required
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      {/* Description */}
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-          Description *
-        </label>
-        <textarea
-          id="description"
-          rows={4}
-          value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          required
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      {/* Year and Duration */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="year" className="block text-sm font-medium text-gray-700">
-            Year *
-          </label>
-          <input
-            type="number"
-            id="year"
-            min="1901"
-            max="2155"
-            value={formData.year}
-            onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-            required
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <div>
-          <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
-            Duration (minutes) *
-          </label>
-          <input
-            type="number"
-            id="duration"
-            min="1"
-            value={formData.duration}
-            onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
-            required
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-      </div>
-
-      {/* Rating */}
-      <div>
-        <label htmlFor="rating" className="block text-sm font-medium text-gray-700">
-          Rating (0-10)
-        </label>
-        <input
-          type="number"
-          id="rating"
-          min="0"
-          max="10"
-          step="0.1"
-          value={formData.rating}
-          onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) || 0 })}
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      {/* Trailer URL */}
-      <div>
-        <label htmlFor="trailer_url" className="block text-sm font-medium text-gray-700">
-          Trailer URL
-        </label>
-        <input
-          type="url"
-          id="trailer_url"
-          value={formData.trailer_url}
-          onChange={(e) => setFormData({ ...formData, trailer_url: e.target.value })}
-          className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      {/* Poster and Backdrop URLs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="poster_url" className="block text-sm font-medium text-gray-700">
-            Poster URL
-          </label>
-          <input
-            type="url"
-            id="poster_url"
-            value={formData.poster_url}
-            onChange={(e) => setFormData({ ...formData, poster_url: e.target.value })}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <div>
-          <label htmlFor="backdrop_url" className="block text-sm font-medium text-gray-700">
-            Backdrop URL
-          </label>
-          <input
-            type="url"
-            id="backdrop_url"
-            value={formData.backdrop_url}
-            onChange={(e) => setFormData({ ...formData, backdrop_url: e.target.value })}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-      </div>
-
-      {/* Genres */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-3">
-          Genres *
-        </label>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {genres.map((genre) => (
-            <label key={genre.id} className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.genre_ids.includes(genre.id)}
-                onChange={() => handleGenreChange(genre.id)}
-                className="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">{genre.name}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {/* Submit Buttons */}
-      <div className="flex justify-end space-x-3 pt-6 border-t">
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-        >
-          {loading ? 'Saving...' : movie ? 'Update Movie' : 'Create Movie'}
-        </button>
-      </div>
-    </form>
   );
 };
 

@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // Admin routes (protected by Sanctum + admin middleware)
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::apiResource('media', Admin\AdminMediaController::class);
+    Route::get('/media-genres', [Admin\AdminMediaController::class, 'getGenres']);
     Route::apiResource('episodes', Admin\AdminEpisodeController::class);
     Route::apiResource('genres', Admin\AdminGenreController::class)->except(['show']);
     
@@ -47,4 +48,16 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function ()
     Route::post('/users/{user}/promote', [Admin\AdminUserController::class, 'promote']);
     Route::post('/users/{user}/demote', [Admin\AdminUserController::class, 'demote']);
     Route::delete('/users/{user}', [Admin\AdminUserController::class, 'destroy']);
+});
+
+// Debug API to check movie data
+Route::get('/api/debug/movies', function () {
+    $movies = Media::where('type', 'movie')
+        ->with('genres')
+        ->take(5)
+        ->get();
+    
+    return response()->json([
+        'movies' => $movies
+    ]);
 });
