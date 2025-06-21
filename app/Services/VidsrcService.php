@@ -38,9 +38,13 @@ class VidsrcService
         $width = $options['width'] ?? '100%';
         $height = $options['height'] ?? '500px';
         
+        // Add security attributes for production
+        $sandbox = app()->environment('production') ? 'sandbox="allow-scripts allow-same-origin allow-presentation"' : '';
+        $allowFullscreen = 'allowfullscreen webkitallowfullscreen mozallowfullscreen';
+        
         return [
             'url' => $url,
-            'embed' => "<iframe src=\"{$url}\" width=\"{$width}\" height=\"{$height}\" frameborder=\"0\" allowfullscreen></iframe>"
+            'embed' => "<iframe src=\"{$url}\" width=\"{$width}\" height=\"{$height}\" frameborder=\"0\" {$sandbox} {$allowFullscreen}></iframe>"
         ];
     }
 
