@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api;
 use App\Http\Controllers\Admin;
+use App\Http\Controllers\Api\StreamingController;
 
 // --- Google OAuth routes (example) ---
 // Route::get('/auth/google/redirect', [Api\AuthController::class, 'redirectToGoogle']);
@@ -36,13 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [Api\AuthController::class, 'logout']);
 });
 
-// Streaming endpoints (public - no auth required for watching)
-Route::prefix('streaming')->group(function () {
-    Route::get('/movie/{tmdbId}', [Api\StreamingController::class, 'getMovieStreaming']);
-    Route::get('/tv/{tmdbId}/{season}/{episode}', [Api\StreamingController::class, 'getTVEpisodeStreaming']);
-    Route::get('/media/{mediaId}', [Api\StreamingController::class, 'getMediaStreaming']);
-    Route::post('/check-availability', [Api\StreamingController::class, 'checkAvailability']);
-});
+Route::get('/streaming/movie/{movieId}', [StreamingController::class, 'getMovieStreaming']);
+Route::get('/streaming/tv/{tvShowId}', [StreamingController::class, 'getTvShowStreaming']);
 
 // TMDB endpoints (public - no auth required for searching)
 Route::prefix('tmdb')->group(function () {

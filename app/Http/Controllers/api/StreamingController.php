@@ -3,113 +3,58 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\VidsrcService;
-use App\Models\Media;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class StreamingController extends Controller
 {
-    private $vidsrcService;
-
-    public function __construct(VidsrcService $vidsrcService)
-    {
-        $this->vidsrcService = $vidsrcService;
-    }
-
-    /**
-     * Get streaming data for a movie by TMDB ID
-     */
-    public function getMovieStreaming($tmdbId): JsonResponse
+    public function getMovieStreaming($movieId): JsonResponse
     {
         try {
-            $streamingData = $this->vidsrcService->getMovieStreamingData($tmdbId);
+            // For testing purposes, return a mock response
+            // Replace this with your actual streaming logic
             
-            if (!$streamingData) {
-                return response()->json([
-                    'available' => false,
-                    'message' => 'Streaming not available for this movie'
-                ], 404);
-            }
-
+            $streamingData = [
+                'success' => true,
+                'movie_id' => $movieId,
+                'streaming_url' => "https://example.com/stream/movie/{$movieId}",
+                'quality' => '1080p',
+                'type' => 'movie'
+            ];
+            
             return response()->json($streamingData);
+            
         } catch (\Exception $e) {
             return response()->json([
-                'available' => false,
-                'message' => 'Error fetching streaming data'
+                'success' => false,
+                'message' => 'Failed to get movie streaming data',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
-
-    /**
-     * Get streaming data for a TV episode by TMDB ID
-     */
-    public function getTVEpisodeStreaming($tmdbId, $season, $episode): JsonResponse
+    
+    public function getTvShowStreaming($tvShowId): JsonResponse
     {
         try {
-            $streamingData = $this->vidsrcService->getTVEpisodeStreamingData($tmdbId, $season, $episode);
+            // For testing purposes, return a mock response
+            // Replace this with your actual streaming logic
             
-            if (!$streamingData) {
-                return response()->json([
-                    'available' => false,
-                    'message' => 'Streaming not available for this episode'
-                ], 404);
-            }
-
+            $streamingData = [
+                'success' => true,
+                'tv_show_id' => $tvShowId,
+                'streaming_url' => "https://example.com/stream/tv/{$tvShowId}",
+                'quality' => '1080p',
+                'type' => 'tv_show'
+            ];
+            
             return response()->json($streamingData);
-        } catch (\Exception $e) {
-            return response()->json([
-                'available' => false,
-                'message' => 'Error fetching streaming data'
-            ], 500);
-        }
-    }
-
-    /**
-     * Get streaming data for media by internal media ID
-     * This will look up the TMDB ID from our media table
-     */
-    public function getMediaStreaming($mediaId, Request $request): JsonResponse
-    {
-        try {
-            $media = Media::findOrFail($mediaId);
             
-            if (!$media->tmdb_id) {
-                return response()->json([
-                    'available' => false,
-                    'message' => 'TMDB ID not available for this media'
-                ], 404);
-            }
-
-            // For TV shows, we might need season/episode info
-            if ($media->type === 'tv') {
-                $season = $request->input('season', 1);
-                $episode = $request->input('episode', 1);
-                
-                return $this->getTVEpisodeStreaming($media->tmdb_id, $season, $episode);
-            } else {
-                return $this->getMovieStreaming($media->tmdb_id);
-            }
         } catch (\Exception $e) {
             return response()->json([
-                'available' => false,
-                'message' => 'Media not found or error fetching streaming data'
+                'success' => false,
+                'message' => 'Failed to get TV show streaming data',
+                'error' => $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Check streaming availability for multiple media items
-     */
-    public function checkAvailability(Request $request): JsonResponse
-    {
-        $tmdbIds = $request->input('tmdb_ids', []);
-        $availability = [];
-
-        foreach ($tmdbIds as $tmdbId) {
-            $availability[$tmdbId] = $this->vidsrcService->isAvailable($tmdbId);
-        }
-
-        return response()->json(['availability' => $availability]);
     }
 }
