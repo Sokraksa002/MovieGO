@@ -21,7 +21,7 @@ type MediaType = 'all' | 'movies' | 'tvshows';
 const Genre: React.FC = () => {
   const { genres = [], movies = [], tvShows = [], allMedia = [], currentGenre, error } = usePage<GenrePageProps>().props;
   
-  const [selectedGenreId, setSelectedGenreId] = useState<number | null>(currentGenre ? currentGenre.id : null);
+  const selectedGenreId = currentGenre ? currentGenre.id : null;
   const [mediaType, setMediaType] = useState<MediaType>('all');
   const [displayMedia, setDisplayMedia] = useState<(Movie | TVShow)[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,12 +73,6 @@ const Genre: React.FC = () => {
     
     return () => clearTimeout(timer);
   }, [selectedGenreId, mediaType, allMedia, movies, tvShows]);
-
-  // Handle genre change
-  const handleGenreChange = (genreId: number | null) => {
-    setIsLoading(true);
-    setSelectedGenreId(genreId);
-  };
 
   // Handle media type change
   const handleMediaTypeChange = (type: MediaType) => {
