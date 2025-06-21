@@ -1,23 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { PlayIcon, StarIcon, CalendarIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartOutline, BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidFilled } from '@heroicons/react/24/solid';
 import { BookmarkIcon as BookmarkSolidFilled } from '@heroicons/react/24/solid';
 import Navbar from '../../components/users/Navbar';
 import Footer from '../../components/users/Footer';
+import StreamingPlayer from '../../components/users/StreamingPlayer';
+import PopupStreamingPlayer from '../../components/users/PopupStreamingPlayer';
 import { MovieDetailPageProps, Movie, SharedData } from '../../types';
-import axios from 'axios';
+import axios from '../../utils/axios';
 
 const MovieDetail: React.FC = () => {
+  console.log('MovieDetail: Component rendering');
+  
   const { id, movie, error } = usePage<MovieDetailPageProps>().props;
   const { auth } = usePage<SharedData>().props;
   const isLoggedIn = auth && auth.user;
+  
+  console.log('MovieDetail: Props received:', { id, movie: !!movie, error, isLoggedIn });
   
   const [isFavorite, setIsFavorite] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [showStreamingPlayer, setShowStreamingPlayer] = useState(false);
+  const [showPopupPlayer, setShowPopupPlayer] = useState(false);
   
   // If movie is not provided, use fallback data
   const movieData: Movie = movie || {
@@ -69,6 +77,11 @@ const MovieDetail: React.FC = () => {
     
     loadStatus();
   }, [movieData.id, isLoggedIn]);
+
+  // Track showStreamingPlayer changes
+  useEffect(() => {
+    console.log('MovieDetail: showStreamingPlayer changed to', showStreamingPlayer);
+  }, [showStreamingPlayer]);
 
   // Handle adding to favorites
   const handleToggleFavorite = async () => {
@@ -156,41 +169,91 @@ const MovieDetail: React.FC = () => {
     }
   };
   
-  // Handle adding to watch history
-  const handleAddToWatchHistory = async () => {
-    if (!isLoggedIn) {
-      window.location.href = '/login';
-      return;
-    }
+  // Handle starting to watch (no login required)
+  const handleStartWatching = async () => {
+    console.log('MovieDetail: handleStartWatching called', { movieData, isProcessing });
     
-    if (isProcessing) return;
-    
-    setIsProcessing(true);
     try {
-      await axios.post('/api/watch-history', {
-        media_id: movieData.id,
-        episode_id: null,
-        progress: 0, // Starting progress
-        duration: duration, // Total duration in minutes
-        watched_at: new Date().toISOString()
-      });
+      if (isProcessing) return;
       
-      // Redirect to streaming page
-      window.location.href = `/stream/${movieData.id}`;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        setStatusMessage({
-          message: error.response.data.message || 'Failed to update watch history',
-          type: 'error'
-        });
-      } else {
-        setStatusMessage({
-          message: 'An error occurred. Please try again.',
-          type: 'error'
-        });
+      setIsProcessing(true);
+      
+      // If user is logged in, optionally update watch history
+      // Temporarily disabled for debugging
+      /*
+      if (isLoggedIn) {
+        try {
+          console.log('MovieDetail: Updating watch history for logged-in user');
+          await axios.post('/api/watch-history', {
+            media_id: movieData.id,
+            episode_id: null,
+            progress: 0, // Starting progress
+            duration: duration, // Total duration in minutes
+            watched_at: new Date().toISOString()
+          });
+          console.log('MovieDetail: Watch history updated successfully');
+        } catch (error) {
+          // Don't block streaming if watch history fails
+          console.warn('MovieDetail: Failed to update watch history:', error);
+        }
       }
+      */
+      
+      // Show streaming player regardless of login status
+      console.log('MovieDetail: Setting showStreamingPlayer to true');
+      setShowStreamingPlayer(true);
+      setIsProcessing(false);
+    } catch (error) {
+      console.error('MovieDetail: Error in handleStartWatching:', error);
       setIsProcessing(false);
     }
+  };
+
+  // Handle closing streaming player
+  const handleCloseStreamingPlayer = () => {
+    console.log('MovieDetail: handleCloseStreamingPlayer called');
+    setShowStreamingPlayer(false);
+  };
+
+  // Handle popup streaming
+  const handlePopupStreaming = async () => {
+    console.log('MovieDetail: handlePopupStreaming called', { movieData, isProcessing });
+    
+    try {
+      if (isProcessing) return;
+      
+      setIsProcessing(true);
+      
+      // If user is logged in, optionally update watch history
+      if (isLoggedIn) {
+        try {
+          console.log('MovieDetail: Updating watch history for logged-in user');
+          await axios.post('/api/watch-history', {
+            media_id: movieData.id,
+            episode_id: null,
+            progress: 0,
+            duration: duration,
+            watched_at: new Date().toISOString()
+          });
+          console.log('MovieDetail: Watch history updated successfully');
+        } catch (error) {
+          console.warn('MovieDetail: Failed to update watch history:', error);
+        }
+      }
+      
+      console.log('MovieDetail: Setting showPopupPlayer to true');
+      setShowPopupPlayer(true);
+      setIsProcessing(false);
+    } catch (error) {
+      console.error('MovieDetail: Error in handlePopupStreaming:', error);
+      setIsProcessing(false);
+    }
+  };
+
+  // Handle closing popup player
+  const handleClosePopupPlayer = () => {
+    console.log('MovieDetail: handleClosePopupPlayer called');
+    setShowPopupPlayer(false);
   };
 
   return (
@@ -289,15 +352,24 @@ const MovieDetail: React.FC = () => {
               </p>
               
               {/* Action Buttons */}
-              <div className="flex gap-4">
-                <Link
-                  href={`/stream/${movieData.id}`}
-                  onClick={handleAddToWatchHistory}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-lg flex items-center gap-3 font-semibold transition-colors duration-200"
+              <div className="flex gap-4 flex-wrap">
+                <button
+                  onClick={handleStartWatching}
+                  disabled={isProcessing}
+                  className={`${isProcessing ? 'bg-gray-600' : 'bg-orange-600 hover:bg-orange-700'} text-white px-8 py-3 rounded-lg flex items-center gap-3 font-semibold transition-colors duration-200`}
                 >
                   <PlayIcon className="w-6 h-6" />
-                  Watch Now
-                </Link>
+                  {isProcessing ? 'Loading...' : 'Watch (Embed)'}
+                </button>
+                
+                <button
+                  onClick={handlePopupStreaming}
+                  disabled={isProcessing}
+                  className={`${isProcessing ? 'bg-gray-600' : 'bg-blue-600 hover:bg-blue-700'} text-white px-8 py-3 rounded-lg flex items-center gap-3 font-semibold transition-colors duration-200`}
+                >
+                  <PlayIcon className="w-6 h-6" />
+                  {isProcessing ? 'Loading...' : 'Watch (Popup)'}
+                </button>
                 
                 <button 
                   onClick={handleToggleFavorite}
@@ -358,7 +430,7 @@ const MovieDetail: React.FC = () => {
                     href={movieData.trailer_url} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                    className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded-lg transition-colors duration-200"
                   >
                     <PlayIcon className="w-5 h-5" />
                     Watch Trailer
@@ -396,6 +468,28 @@ const MovieDetail: React.FC = () => {
       </div>
       
       <Footer />
+      
+      <Footer />
+      
+      {/* Streaming Player */}
+      {showStreamingPlayer && movieData.tmdb_id && typeof movieData.tmdb_id === 'number' && (
+        <StreamingPlayer
+          tmdbId={movieData.tmdb_id!}
+          type={movieData.type === 'tv_show' ? 'tv' : 'movie'}
+          title={movieData.title}
+          onClose={handleCloseStreamingPlayer}
+        />
+      )}
+      
+      {/* Popup Streaming Player */}
+      {showPopupPlayer && movieData.tmdb_id && typeof movieData.tmdb_id === 'number' && (
+        <PopupStreamingPlayer
+          tmdbId={movieData.tmdb_id!}
+          type={movieData.type === 'tv_show' ? 'tv' : 'movie'}
+          title={movieData.title}
+          onClose={handleClosePopupPlayer}
+        />
+      )}
     </div>
   );
 };

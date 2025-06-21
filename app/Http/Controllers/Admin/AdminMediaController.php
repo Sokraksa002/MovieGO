@@ -153,7 +153,17 @@ class AdminMediaController extends Controller
                 'genres' => 'nullable|array',
                 'genres.*' => 'exists:genres,id',
                 'poster_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'backdrop_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+                'backdrop_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+                // TMDB fields
+                'tmdb_id' => 'nullable|integer',
+                'imdb_id' => 'nullable|string',
+                'tmdb_poster_path' => 'nullable|string',
+                'tmdb_backdrop_path' => 'nullable|string',
+                'tmdb_vote_average' => 'nullable|numeric|min:0|max:10',
+                'tmdb_vote_count' => 'nullable|integer|min:0',
+                'tmdb_popularity' => 'nullable|numeric|min:0',
+                'tmdb_original_language' => 'nullable|string|max:10',
+                'tmdb_adult' => 'nullable|boolean'
             ]);
 
             DB::beginTransaction();

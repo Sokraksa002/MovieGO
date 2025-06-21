@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Streaming Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #1a1a1a; color: white; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        button { padding: 15px 30px; margin: 10px; background: #ffbf00; border: none; color: white; cursor: pointer; font-size: 16px; border-radius: 5px; }
+        button:hover { background: #ffc933; }
+        #output { background: #333; padding: 20px; margin: 20px 0; white-space: pre-wrap; font-family: monospace; }
+        iframe { width: 100%; height: 600px; border: 1px solid #ccc; }
+        .player-container { margin: 20px 0; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simple Streaming Test</h1>
+        <p>This page tests if the vidsrc.xyz iframe works without any React/Inertia interference.</p>
+        
+        <button onclick="showIframe()">Test VidSrc Iframe</button>
+        <button onclick="clearTest()">Clear Test</button>
+        
+        <div id="output"></div>
+        
+        <div id="player-container" class="player-container hidden">
+            <h3>Video Player:</h3>
+            <iframe id="video-iframe" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const timestamp = new Date().toISOString();
+            document.getElementById('output').textContent += timestamp + ': ' + message + '\n';
+            console.log(timestamp + ': ' + message);
+        }
+
+        function showIframe() {
+            log('Starting iframe test...');
+            
+            const iframe = document.getElementById('video-iframe');
+            const container = document.getElementById('player-container');
+            
+            // Use the exact URL format from our API
+            const streamingUrl = 'https://vidsrc.xyz/embed/movie?tmdb=680';
+            
+            log('Setting iframe src to: ' + streamingUrl);
+            iframe.src = streamingUrl;
+            
+            container.classList.remove('hidden');
+            
+            iframe.onload = function() {
+                log('Iframe loaded successfully');
+            };
+            
+            iframe.onerror = function(e) {
+                log('Iframe error: ' + e.message);
+            };
+            
+            // Check for navigation after a few seconds
+            setTimeout(() => {
+                if (window.location.pathname === '/simple-streaming-test.html') {
+                    log('No navigation detected - iframe is working correctly');
+                } else {
+                    log('Page was navigated to: ' + window.location.href);
+                }
+            }, 3000);
+        }
+
+        function clearTest() {
+            document.getElementById('output').textContent = '';
+            document.getElementById('player-container').classList.add('hidden');
+            document.getElementById('video-iframe').src = '';
+            log('Test cleared');
+        }
+
+        // Monitor for navigation
+        window.addEventListener('beforeunload', function() {
+            log('Page is about to be unloaded - possible navigation detected');
+        });
+
+        log('Simple streaming test page loaded');
+    </script>
+</body>
+</html>

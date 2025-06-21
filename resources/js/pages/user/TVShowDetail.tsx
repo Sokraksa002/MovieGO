@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { usePage } from '@inertiajs/react';
 import { PlayIcon, StarIcon, CalendarIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { HeartIcon as HeartOutline, BookmarkIcon as BookmarkOutline } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidFilled } from '@heroicons/react/24/solid';
 import { BookmarkIcon as BookmarkSolidFilled } from '@heroicons/react/24/solid';
 import Navbar from '../../components/users/Navbar';
 import Footer from '../../components/users/Footer';
+import StreamingPlayer from '../../components/users/StreamingPlayer';
 import { TVShowDetailPageProps, TVShow, SharedData } from '../../types';
-import axios from 'axios';
+import axios from '../../utils/axios';
 
 const TVShowDetail: React.FC = () => {
   const { id, tvShow, error } = usePage<TVShowDetailPageProps>().props;
@@ -18,6 +19,9 @@ const TVShowDetail: React.FC = () => {
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [showStreamingPlayer, setShowStreamingPlayer] = useState(false);
+  const [selectedSeason, setSelectedSeason] = useState(1);
+  const [selectedEpisode, setSelectedEpisode] = useState(1);
   
   // If tvShow is not provided, use fallback data
   const tvShowData: TVShow = tvShow || {
@@ -161,41 +165,36 @@ const TVShowDetail: React.FC = () => {
     }
   };
   
-  // Handle adding to watch history
-  const handleAddToWatchHistory = async () => {
-    if (!isLoggedIn) {
-      window.location.href = '/login';
-      return;
-    }
-    
+  // Handle starting to watch (no login required)
+  const handleStartWatching = async () => {
     if (isProcessing) return;
     
     setIsProcessing(true);
-    try {
-      await axios.post('/api/watch-history', {
-        media_id: tvShowData.id,
-        episode_id: null,
-        progress: 0, // Starting progress
-        duration: 45, // Assume average episode length is 45 minutes
-        watched_at: new Date().toISOString()
-      });
-      
-      // Redirect to streaming page
-      window.location.href = `/tv-shows/${tvShowData.id}/stream`;
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        setStatusMessage({
-          message: error.response.data.message || 'Failed to update watch history',
-          type: 'error'
+    
+    // If user is logged in, optionally update watch history
+    if (isLoggedIn) {
+      try {
+        await axios.post('/api/watch-history', {
+          media_id: tvShowData.id,
+          episode_id: null,
+          progress: 0, // Starting progress
+          duration: 45, // Assume average episode length is 45 minutes
+          watched_at: new Date().toISOString()
         });
-      } else {
-        setStatusMessage({
-          message: 'An error occurred. Please try again.',
-          type: 'error'
-        });
+      } catch (error) {
+        // Don't block streaming if watch history fails
+        console.warn('Failed to update watch history:', error);
       }
-      setIsProcessing(false);
     }
+    
+    // Show streaming player regardless of login status
+    setShowStreamingPlayer(true);
+    setIsProcessing(false);
+  };
+
+  // Handle closing streaming player
+  const handleCloseStreamingPlayer = () => {
+    setShowStreamingPlayer(false);
   };
   
   return (
@@ -294,14 +293,14 @@ const TVShowDetail: React.FC = () => {
               
               {/* Action Buttons */}
               <div className="flex gap-4">
-                <Link
-                  href={`/tv-shows/${tvShowData.id}/stream`}
-                  onClick={handleAddToWatchHistory}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-8 py-3 rounded-lg flex items-center gap-3 font-semibold transition-colors duration-200"
+                <button
+                  onClick={handleStartWatching}
+                  disabled={isProcessing}
+                  className={`${isProcessing ? 'bg-gray-600' : 'bg-orange-600 hover:bg-orange-700'} text-white px-8 py-3 rounded-lg flex items-center gap-3 font-semibold transition-colors duration-200`}
                 >
                   <PlayIcon className="w-6 h-6" />
-                  Watch Now
-                </Link>
+                  {isProcessing ? 'Loading...' : 'Watch Now'}
+                </button>
                 
                 <button 
                   onClick={handleToggleFavorite}
@@ -394,6 +393,18 @@ const TVShowDetail: React.FC = () => {
       </div>
       
       <Footer />
+      
+      {/* Streaming Player */}
+      {showStreamingPlayer && tvShowData.tmdb_id && typeof tvShowData.tmdb_id === 'number' && (
+        <StreamingPlayer
+          tmdbId={tvShowData.tmdb_id!}
+          type="tv"
+          season={selectedSeason}
+          episode={selectedEpisode}
+          title={tvShowData.name || tvShowData.title || 'TV Show'}
+          onClose={handleCloseStreamingPlayer}
+        />
+      )}
     </div>
   );
 };

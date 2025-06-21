@@ -23,6 +23,46 @@ router.on('start', () => {
     }
 });
 
+// Add navigation logging to debug redirect issues
+router.on('navigate', (event) => {
+    console.log('Inertia navigation detected:', event.detail.page.url);
+});
+
+router.on('before', (event) => {
+    console.log('Inertia navigation starting to:', event.detail.visit.url);
+});
+
+router.on('start', (event) => {
+    console.log('Inertia visit started:', event.detail.visit.url);
+});
+
+router.on('finish', (event) => {
+    console.log('Inertia visit finished:', event.detail.visit.url);
+});
+
+// Add global navigation monitoring
+window.addEventListener('beforeunload', () => {
+    console.log('Window about to unload - potential redirect detected');
+});
+
+window.addEventListener('popstate', () => {
+    console.log('Browser navigation (back/forward):', window.location.href);
+});
+
+// Monitor for any programmatic navigation
+const originalPushState = history.pushState;
+const originalReplaceState = history.replaceState;
+
+history.pushState = function(...args) {
+    console.log('history.pushState called:', args[2]);
+    return originalPushState.apply(this, args);
+};
+
+history.replaceState = function(...args) {
+    console.log('history.replaceState called:', args[2]);
+    return originalReplaceState.apply(this, args);
+};
+
 // Remove the custom login overlay logic to always render Inertia pages
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

@@ -45,6 +45,16 @@ export interface BaseMedia {
     genres?: Genre[];
     created_at?: string;
     updated_at?: string;
+    // TMDB fields
+    tmdb_id?: number;
+    imdb_id?: string;
+    tmdb_poster_path?: string;
+    tmdb_backdrop_path?: string;
+    tmdb_vote_average?: number;
+    tmdb_vote_count?: number;
+    tmdb_popularity?: number;
+    tmdb_original_language?: string;
+    tmdb_adult?: boolean;
 }
 
 export interface Movie extends BaseMedia {
@@ -57,7 +67,7 @@ export interface Movie extends BaseMedia {
     runtime?: number;        // Legacy compatibility
     trailer_url?: string;
     streaming_url?: string;
-    type?: 'movie';
+    type?: 'movie' | 'tv_show';  // Updated to include tv_show
     poster_url?: string;     // Database field name
     backdrop_url?: string;   // Database field name
 }

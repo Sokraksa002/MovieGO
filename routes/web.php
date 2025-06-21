@@ -476,6 +476,13 @@ Route::get('/movies/{id}', function ($id) {
     try {
         $movie = Media::with('genres')->where('type', 'movie')->findOrFail($id);
         
+        \Log::info('Movie detail loaded', [
+            'movie_id' => $movie->id,
+            'title' => $movie->title,
+            'tmdb_id' => $movie->tmdb_id,
+            'has_tmdb_id' => !is_null($movie->tmdb_id)
+        ]);
+        
         return Inertia::render('user/MovieDetail', [
             'id' => $id,
             'movie' => $movie
@@ -715,6 +722,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         ]);
     })->name('genres');
     
+    Route::get('/tmdb-integration', function () {
+        $media = Media::whereNull('tmdb_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return Inertia::render('admin/TmdbIntegration', [
+            'media' => $media
+        ]);
+    })->name('tmdb-integration');
+    
     // Genre CRUD routes
     Route::post('/genres', function (Request $request) {
         $validated = $request->validate([
@@ -839,13 +856,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
         
         return redirect()->route('admin.movies')->with('success', 'Movie updated successfully!');
     })->name('movies.update');
-    
-    Route::delete('/movies/{movie}', function (Media $movie) {
+     Route::delete('/movies/{movie}', function (Media $movie) {
         $movie->delete();
         
         return redirect()->route('admin.movies')->with('success', 'Movie deleted successfully!');
     })->name('movies.destroy');
-    
+
+    // TMDB linking route for media
+    Route::patch('/media/{media}/link-tmdb', function (Request $request, Media $media) {
+        $validated = $request->validate([
+            'tmdb_id' => 'required|integer'
+        ]);
+
+        $media->update(['tmdb_id' => $validated['tmdb_id']]);
+
+        return redirect()->route('admin.tmdb-integration')->with('success', 'Media linked to TMDB successfully!');
+    })->name('media.link-tmdb');
+
     // TV Show CRUD routes
     Route::get('/tvshows/create', function () {
         $genres = App\Models\Genre::orderBy('name')->get();

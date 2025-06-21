@@ -3,7 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import { 
   UserIcon, FilmIcon, TvIcon, UsersIcon, 
   ChartBarIcon, TagIcon, ArrowRightOnRectangleIcon as LogoutIcon, 
-  Bars3Icon as MenuIcon, XMarkIcon as XIcon 
+  Bars3Icon as MenuIcon, XMarkIcon as XIcon, LinkIcon
 } from '@heroicons/react/24/outline';
 
 // Define PageProps interface for usePage generic
@@ -38,6 +38,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { name: 'TV Shows', icon: TvIcon, route: 'admin.tvshows' },
     { name: 'Users', icon: UsersIcon, route: 'admin.users' },
     { name: 'Genres', icon: TagIcon, route: 'admin.genres' },
+    { name: 'TMDB Integration', icon: LinkIcon, route: 'admin.tmdb-integration' },
   ];
 
   return (

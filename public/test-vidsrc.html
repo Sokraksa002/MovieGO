@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vidsrc Test - Pulp Fiction</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #000; color: #fff; }
+        iframe { width: 100%; height: 600px; border: none; }
+        .info { margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <div class="info">
+        <h1>Vidsrc Test - Pulp Fiction (TMDB ID: 680)</h1>
+        <p>Testing direct embedding of Vidsrc iframe</p>
+        <p>URL: https://vidsrc.to/embed/movie/680</p>
+    </div>
+    
+    <iframe 
+        src="https://vidsrc.to/embed/movie/680" 
+        allowfullscreen
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+    </iframe>
+    
+    <script>
+        console.log('Vidsrc test page loaded');
+        
+        // Listen for iframe messages
+        window.addEventListener('message', function(event) {
+            console.log('Iframe message received:', event);
+        });
+        
+        // Test if iframe loads
+        const iframe = document.querySelector('iframe');
+        iframe.onload = function() {
+            console.log('Iframe loaded successfully');
+        };
+        iframe.onerror = function() {
+            console.error('Iframe failed to load');
+        };
+    </script>
+</body>
+</html>

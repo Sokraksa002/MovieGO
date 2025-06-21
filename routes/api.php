@@ -36,6 +36,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [Api\AuthController::class, 'logout']);
 });
 
+// Streaming endpoints (public - no auth required for watching)
+Route::prefix('streaming')->group(function () {
+    Route::get('/movie/{tmdbId}', [Api\StreamingController::class, 'getMovieStreaming']);
+    Route::get('/tv/{tmdbId}/{season}/{episode}', [Api\StreamingController::class, 'getTVEpisodeStreaming']);
+    Route::get('/media/{mediaId}', [Api\StreamingController::class, 'getMediaStreaming']);
+    Route::post('/check-availability', [Api\StreamingController::class, 'checkAvailability']);
+});
+
+// TMDB endpoints (public - no auth required for searching)
+Route::prefix('tmdb')->group(function () {
+    Route::get('/search', [Api\TmdbController::class, 'search']);
+    Route::get('/movie/{tmdbId}', [Api\TmdbController::class, 'getMovie']);
+    Route::get('/tv/{tmdbId}', [Api\TmdbController::class, 'getTVShow']);
+    Route::get('/tv/{tmdbId}/season/{seasonNumber}', [Api\TmdbController::class, 'getTVSeason']);
+    Route::get('/popular/movies', [Api\TmdbController::class, 'getPopularMovies']);
+    Route::get('/popular/tv', [Api\TmdbController::class, 'getPopularTVShows']);
+});
+
 // Admin routes (protected by Sanctum + admin middleware)
 Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::apiResource('media', Admin\AdminMediaController::class);
