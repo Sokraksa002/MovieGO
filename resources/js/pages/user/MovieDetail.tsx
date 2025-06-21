@@ -469,7 +469,8 @@ const MovieDetail: React.FC = () => {
       
       <Footer />
       
-      <Footer />
+      {/* DEBUG: If you see this text twice, there's still a duplicate Footer */}
+      <div style={{display: 'none'}}>MovieDetail Footer Instance</div>
       
       {/* Streaming Player */}
       {showStreamingPlayer && movieData.tmdb_id && typeof movieData.tmdb_id === 'number' && (
