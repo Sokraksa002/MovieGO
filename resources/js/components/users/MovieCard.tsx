@@ -200,13 +200,17 @@ const MovieCard: React.FC<MovieCardProps> = ({
             isHovered ? 'opacity-100' : 'opacity-0'
           }`}>
             <div className="flex space-x-3">
-              <Link
-                href={detailUrl}
-                className="bg-yellow-500 text-black p-3 rounded-full hover:bg-yellow-400 transition-all duration-200 transform hover:scale-110 shadow-lg"
+              <div
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  window.location.href = detailUrl;
+                }}
+                className="bg-yellow-500 text-black p-3 rounded-full hover:bg-yellow-400 transition-all duration-200 transform hover:scale-110 shadow-lg cursor-pointer"
                 title={isTV ? "Watch TV Show" : "Watch Movie"}
               >
                 <PlayIcon className="w-5 h-5" />
-              </Link>
+              </div>
               <button
                 onClick={handleTrailerClick}
                 className="bg-red-600/90 text-white p-3 rounded-full hover:bg-red-600 transition-all duration-200 transform hover:scale-110 shadow-lg"
