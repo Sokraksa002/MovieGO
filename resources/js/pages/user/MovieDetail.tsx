@@ -356,7 +356,7 @@ const MovieDetail: React.FC = () => {
                 <button
                   onClick={handleStartWatching}
                   disabled={isProcessing}
-                  className={`${isProcessing ? 'bg-gray-600' : 'bg-orange-600 hover:bg-orange-700'} text-white px-8 py-3 rounded-lg flex items-center gap-3 font-semibold transition-colors duration-200`}
+                  className={`${isProcessing ? 'bg-gray-600' : 'bg-yellow-600 hover:bg-yellow-700'} text-white px-8 py-3 rounded-lg flex items-center gap-3 font-semibold transition-colors duration-200`}
                 >
                   <PlayIcon className="w-6 h-6" />
                   {isProcessing ? 'Loading...' : 'Watch (Embed)'}
